@@ -1,2 +1,2 @@
 # Citcoin-blockchain
-Hyperledger Fabric demo - Citcoin blockchain network
+Citcoin blockchain network - Hyperledger Fabric Demo App
