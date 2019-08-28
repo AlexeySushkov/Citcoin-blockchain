@@ -1,7 +1,7 @@
 {
-    "name": "citcoin3",
-    "version": "0.0.1",
-    "description": "Citcoin blockchain",
+    "name": "citcoin4",
+    "version": "0.0.7",
+    "description": "Citcoin blockchain v0.0.7",
     "main": "index.js",
     "engines": {
         "node": ">=8",

@@ -8,6 +8,12 @@ export default {
     })
     return api.get('hiperledgerDemo/v1/init')
   },
+  blockchain_disconnect () {
+    let api = axios.create({
+      baseURL: config.baseURL
+    })
+    return api.get('hiperledgerDemo/v1/disconnect')
+  },
   blockchain_account (params) {
     let api = axios.create({
       baseURL: config.baseURL
@@ -31,5 +37,11 @@ export default {
       baseURL: config.baseURL
     })
     return api.get('hiperledgerDemo/v1/events')
-  }
+  },
+  blockchain_list_accounts () {
+    let api = axios.create({
+      baseURL: config.baseURL
+    })
+    return api.get('hiperledgerDemo/v1/accounts/list')
+  }  
 }

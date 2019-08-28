@@ -19,6 +19,16 @@
           </v-list-item>
          <v-list-item
             :key="2"
+            @click="dialog_disconnect = !dialog_disconnect"
+          >
+            <v-list-item-content>
+              <v-list-item-title>
+                Disconnect Blockchain
+              </v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+         <v-list-item
+            :key="3"
             @click="dialog_new_account = !dialog_new_account"
           >
             <v-list-item-content>
@@ -28,7 +38,7 @@
             </v-list-item-content>
           </v-list-item>          
           <v-list-item
-            :key="3"
+            :key="4"
             @click="dialog_transaction = !dialog_transaction"
           >
             <v-list-item-content>
@@ -38,7 +48,7 @@
             </v-list-item-content>
           </v-list-item>     
           <v-list-item
-            :key="4"
+            :key="5"
             @click="dialog_events = !dialog_events"
           >
             <v-list-item-content>
@@ -48,7 +58,17 @@
             </v-list-item-content>
           </v-list-item>   
           <v-list-item
-            :key="5"
+            :key="6"
+            @click="dialog_view_accounts = !dialog_view_accounts"
+          >
+            <v-list-item-content>
+              <v-list-item-title>
+                Accounts List
+              </v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>           
+          <v-list-item
+            :key="7"
             @click="dialog_about = !dialog_about"
           >
             <v-list-item-content>
@@ -89,7 +109,17 @@
         </v-toolbar>
          <v-container>
             <v-text-field
-              value="Hyperledger Fabric Demo v1.5"
+              value="Citcoin Network v1.5"
+              solo           
+              readonly
+            ></v-text-field>
+            <v-text-field
+              value="Hyperledger Fabric Blockchain Demo"
+              solo           
+              readonly
+            ></v-text-field>
+            <v-text-field
+              value="(c) Alexey Sushkov, 2019"
               solo           
               readonly
             ></v-text-field>
@@ -134,6 +164,36 @@
          </v-card-actions>
       </v-card>
     </v-dialog>    
+   <v-dialog
+      v-model="dialog_disconnect"
+      width="400px"
+    >
+      <v-card class="elevation-12">
+        <v-toolbar dark color="blue darken-3">
+          <v-toolbar-title>Disconnect Blockchain</v-toolbar-title>
+        </v-toolbar>
+         <v-container>
+            <v-text-field
+              v-model="BlockchainState"
+              solo           
+              readonly
+            ></v-text-field>
+        </v-container>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            dark color="blue darken-3"
+            @click="BlockchainDisconnect"
+          >Disconnect
+          </v-btn>
+          <v-btn
+            dark color="blue darken-3"
+            @click="dialog_disconnect = false"
+          >Cancel
+          </v-btn>          
+         </v-card-actions>
+      </v-card>
+    </v-dialog>      
   <v-dialog
       v-model="dialog_transaction"
       width="400px"
@@ -143,34 +203,31 @@
           <v-toolbar-title>Send Transaction</v-toolbar-title>
         </v-toolbar>
          <v-container>
-            <v-select
-              :items="['Bob', 'Alice']"
+            <v-text-field
               label="From"
               v-model="fromAccount"
-            ></v-select>            
+            ></v-text-field>
             <v-text-field
               label="From Balance"
               v-model="fromBalance"
+              append-outer-icon="search"
+              @click:append-outer="GetBalanceFrom"
             ></v-text-field>
-            <v-select
-              :items="['Bob', 'Alice']"
+            <v-text-field
               label="To"
               v-model="toAccount"
-            ></v-select>                       
+            ></v-text-field>
             <v-text-field
               label="To Balance"
               v-model="toBalance"
+              append-outer-icon="search"
+              @click:append-outer="GetBalanceTo"
             ></v-text-field>
             <v-select
-              :items="['1', '2', '3']"
+              :items="['1', '2', '5', '10']"
               label="Amount citcoins"
               v-model="volume"
             ></v-select>                               
-            <v-text-field
-              v-model="BlockchainState"
-              solo           
-              readonly
-            ></v-text-field>
         </v-container>
         <v-card-actions class="justify-center">
           <v-spacer></v-spacer>
@@ -179,11 +236,6 @@
             @click="SendTransaction"
           >Send
           </v-btn>          
-          <v-btn
-            dark color="blue darken-3"
-            @click="GetBalances"
-          >Get Balaces
-          </v-btn>
           <v-btn
             dark color="blue darken-3"
             @click="dialog_transaction = false"
@@ -211,11 +263,6 @@
               type='number'
               v-model="newBalance"
             ></v-text-field>                          
-            <v-text-field
-              v-model="BlockchainState"
-              solo           
-              readonly
-            ></v-text-field>
         </v-container>
         <v-card-actions class="justify-center">
           <v-spacer></v-spacer>
@@ -238,21 +285,16 @@
     >
       <v-card class="elevation-12">
         <v-toolbar dark color="blue darken-3">
-          <v-toolbar-title>Events</v-toolbar-title>
+          <v-toolbar-title>Start Events</v-toolbar-title>
         </v-toolbar>
          <v-container>
-            <v-text-field
-              v-model="BlockchainState"
-              solo          
-              readonly 
-            ></v-text-field>
         </v-container>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
             dark color="blue darken-3"
             @click="BlockchainEvents"
-          >Events
+          >Start
           </v-btn>
           <v-btn
             dark color="blue darken-3"
@@ -262,7 +304,32 @@
          </v-card-actions>
       </v-card>
     </v-dialog>        
-        <v-btn
+      <v-dialog
+      v-model="dialog_view_accounts"
+      width="400px"
+    >
+      <v-card class="elevation-12">
+        <v-toolbar dark color="blue darken-3">
+          <v-toolbar-title>List Accounts</v-toolbar-title>
+        </v-toolbar>
+         <v-container>
+        </v-container>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            dark color="blue darken-3"
+            @click="BlockchainListAccounts"
+          >Get List
+          </v-btn>
+          <v-btn
+            dark color="blue darken-3"
+            @click="dialog_view_accounts = false"
+          >Cancel
+          </v-btn>          
+         </v-card-actions>
+      </v-card>
+    </v-dialog> 
+    <v-btn
       bottom
       color="pink"
       dark
@@ -273,11 +340,64 @@
     >
       <v-icon>add</v-icon>
     </v-btn>    
+    <v-content>
+      <v-container
+        class="fill-height"
+        fluid
+      >
+
+        <v-row
+          align="streach"
+          justify="center"
+        >
+        <v-card class="elevation-12" width = "500" max-width="800">
+        <v-toolbar dark color="blue darken-3">
+          <v-toolbar-title>Log view (new records first)</v-toolbar-title>
+        </v-toolbar>
+         <v-container>
+          <v-list rounded dense>
+           <v-list-item-group v-model="item" color="primary">
+              <v-list-item
+                v-for="(item, i) in items"
+                :key="i"
+              >
+                <v-list-item-content>
+                  <v-list-item-title v-text="item.text"></v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list-item-group>
+          </v-list>
+        </v-container>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            dark color="blue darken-3"
+            @click="ClearLog"
+          >Clear Log
+          </v-btn>          
+         </v-card-actions>
+      </v-card>
+        </v-row>
+      </v-container>
+    </v-content>    
   </v-app>
 </template>
 
 <script>
-  import BlockchainApi from '@/services/BlockchainApi'
+  import BlockchainApi from '@/services/BlockchainApiClient'
+    function AddLog(items, text)
+    {
+      console.log('AddLog')
+      var currentdate = new Date()
+      var datetime = '' + currentdate.getHours() + ':' + currentdate.getMinutes() + ':' + currentdate.getSeconds()
+      let ooo = {}
+      ooo.text = datetime + '   ' + text
+      ooo.icon = 'No icon'
+      console.log(ooo)    
+      console.log('AddLog: ', ooo)
+
+      items.unshift(ooo)
+    }  
   export default {
     props: {
       source: String,
@@ -286,10 +406,13 @@
       dialog: false,
       dialog_about: false,
       dialog_init: false,
+      dialog_disconnect: false,
       dialog_transaction: false,
       dialog_events: false,
+      dialog_view_accounts: false,
       dialog_new_account: false,
-      BlockchainState: 'Status: Initinal',
+      BlockchainState: 'Blockchain status: Not initialized',
+      items: [{text: 'Blockchain status: Not initialized', icon: 'No icon'}],
       fromAccount: null,
       toAccount: null,
       fromBalance: null,
@@ -298,16 +421,38 @@
       newBalance: null,
       volume: null,
       drawer: null,
-      items: [
-        { icon: 'contacts', text: 'Contacts', click: 'dialog_about = !dialog_about' },
-        { icon: 'history', text: 'Frequently contacted', click: 'dialog = !dialog' }
-      ],
     }),
     methods: {
+    async ClearLog () {
+      console.log('ClearLog')
+      this.items = []
+     },
     async BlockchainInit () {
       console.log('InitBlockchain')
+      this.dialog_init = false
+
+      this.BlockchainState = 'Initializing Blockchain...'
+      AddLog(this.items, this.BlockchainState)
+
       try {
         let ret = await BlockchainApi.blockchain_init()
+        // console.log('InitBlockchain ret: ', ret)
+        this.BlockchainState = ret.data.status
+      } catch (error) {
+        if ((error.response !== undefined) && (error.response.data.error !== undefined)) {
+          this.BlockchainState = error.response.data.error
+         } else {
+          this.BlockchainState = 'No connection to the Blockchain server'
+        }
+      }
+        AddLog(this.items, this.BlockchainState)
+     },
+    async BlockchainDisconnect () {
+      console.log('BlockchainDisconnect')
+      this.dialog_disconnect = false
+      AddLog(this.items, 'Blockchain disconnecting...')
+      try {
+        let ret = await BlockchainApi.blockchain_disconnect()
         // console.log('InitBlockchain ret: ', ret)
         this.BlockchainState = ret.data.status
       } catch (error) {
@@ -317,9 +462,13 @@
           this.BlockchainState = 'No connection to the Blockchain server'
         }
       }
+        AddLog(this.items, this.BlockchainState)  
      },
     async SendTransaction () {
       console.log('SendTransaction')
+      this.dialog_transaction = false
+      this.BlockchainState = 'Status: Sending transaction...'
+      AddLog(this.items, this.BlockchainState)
       try {
         let params = {
           from: this.fromAccount,
@@ -327,8 +476,8 @@
           volume: this.volume
         }
         console.log('SendTransaction: ', params)
-        this.BlockchainState = 'Status: Sending transaction...'
         let ret = await BlockchainApi.blockchain_transaction(params)
+        console.log('SendTransaction: ret.data.status: ', ret.data.status)
         this.BlockchainState = ret.data.status
         } catch (error) {
         if ((error.response !== undefined) && (error.response.data.error !== undefined)) {
@@ -337,16 +486,22 @@
           this.BlockchainState = 'No connection to the Blockchain server'
         }
       }
+        AddLog(this.items, this.BlockchainState)  
+        await this.GetBalanceFrom ()
+        await this.GetBalanceTo ()
      },
     async AddAccount () {
       console.log('AddAccount')
+      this.dialog_new_account = false
+      this.BlockchainState = 'Status: Adding account...'
+      AddLog(this.items, this.BlockchainState)  
+
       try {
         let params = {
           name: this.newAccount,
-          balance: this.balance
+          balance: this.newBalance
         }
         console.log('AddAccount: ', params)
-        this.BlockchainState = 'Status: Adding account...'
         let ret = await BlockchainApi.blockchain_account(params)
         this.BlockchainState = ret.data.status
         } catch (error) {
@@ -356,25 +511,19 @@
           this.BlockchainState = 'No connection to the Blockchain server'
         }
       }
+      AddLog(this.items, this.BlockchainState)  
      },     
-    async GetBalances () {
-      console.log('GetBalances')
+    async GetBalanceFrom () {
+      console.log('GetBalanceFrom')
       try {
-        this.BlockchainState = 'Status: Getting balances...'       
+        this.BlockchainState = 'Status: Getting balance From...'       
+        AddLog(this.items, this.BlockchainState)  
         let params = {
           account: this.fromAccount
         }
         console.log('GetBalance: ', params)
         let ret = await BlockchainApi.blockchain_info(params)
         this.fromBalance = ret.data.balance
-
-        params = {
-          account: this.toAccount
-        }
-        console.log('GetBalance: ', params)
-        ret = await BlockchainApi.blockchain_info(params)
-        this.toBalance = ret.data.balance
-
         this.BlockchainState = ret.data.status
         } catch (error) {
         if ((error.response !== undefined) && (error.response.data.error !== undefined)) {
@@ -383,9 +532,35 @@
           this.BlockchainState = 'No connection to the Blockchain server'
         }
       }
+        AddLog(this.items, this.BlockchainState)  
      },     
-    async BlockchainEvents () {
+    async GetBalanceTo () {
+      console.log('GetBalanceTo')
+      try {
+        this.BlockchainState = 'Status: Getting balances To...'       
+        AddLog(this.items, this.BlockchainState)  
+        let params = {
+          account: this.toAccount
+        }
+        console.log('GetBalance: ', params)
+        let ret = await BlockchainApi.blockchain_info(params)
+        this.toBalance = ret.data.balance
+        this.BlockchainState = ret.data.status
+        } catch (error) {
+        if ((error.response !== undefined) && (error.response.data.error !== undefined)) {
+          this.BlockchainState = error.response.data.error
+        } else {
+          this.BlockchainState = 'No connection to the Blockchain server'
+        }
+      }
+        AddLog(this.items, this.BlockchainState)  
+     },     
+    async BlockchainEvents () {      
       console.log('BlockchainEvents')
+      this.BlockchainState = 'Status: Start getting events...'       
+      AddLog(this.items, this.BlockchainState)  
+
+      this.dialog_events = false
       try {
         let ret = await BlockchainApi.blockchain_events()
         // console.log('BlockchainEvents ret: ', ret)
@@ -397,7 +572,29 @@
           this.BlockchainState = 'No connection to the Blockchain server'
         }
       }
-     }     
-     }
+        AddLog(this.items, this.BlockchainState)  
+     }, // BlockchainEvents
+    async BlockchainListAccounts () {      
+      console.log('BlockchainListAccounts')
+      this.BlockchainState = 'Status: Start getting list accounts'       
+      AddLog(this.items, this.BlockchainState)  
+
+      this.dialog_view_accounts = false
+      try {
+        let ret = await BlockchainApi.blockchain_list_accounts()
+        // console.log('BlockchainEvents ret: ', ret)
+        this.BlockchainState = ret.data.status
+        AddLog(this.items, this.BlockchainState)  
+        AddLog(this.items, ret.data.list)  
+     } catch (error) {
+        if ((error.response !== undefined) && (error.response.data.error !== undefined)) {
+          this.BlockchainState = error.response.data.error
+        } else {
+          this.BlockchainState = 'No connection to the Blockchain server'
+        }
+        AddLog(this.items, this.BlockchainState)  
+      }
+     } // BlockchainListAccounts   
+     } 
     }
 </script>

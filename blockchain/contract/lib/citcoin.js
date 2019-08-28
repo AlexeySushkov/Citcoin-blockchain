@@ -1,5 +1,5 @@
 /*
- * Citcoin smart-contract for Hyperledger Fabric
+ * Citcoin smart-contract v1.5 for Hyperledger Fabric 
  * (c) Alexey Sushkov, 2019
  */
 
@@ -15,7 +15,20 @@ class CitcoinEvents extends Contract {
         let emptyList = [];
         await ctx.stub.putState('accounts', Buffer.from(JSON.stringify(emptyList)));
     }
-
+    // Get all accounts
+    async GetAccounts(ctx) {
+        // Get account list:
+        let accounts = '{}'
+        let accountsData = await ctx.stub.getState('accounts');
+        if (accountsData) {
+            accounts = JSON.parse(accountsData.toString());
+        } else {
+            throw new Error('accounts not found');
+        }
+        // return  object
+        // return JSON.stringify(accounts);
+        return accountsData.toString()
+    }
      // add a account object to the blockchain state identifited by their name
     async AddAccount(ctx, name, balance) {
         // this is account data:
@@ -31,7 +44,7 @@ class CitcoinEvents extends Contract {
         let accountsData = await ctx.stub.getState('accounts');
         if (accountsData) {
             let accounts = JSON.parse(accountsData.toString());
-            if (acounts.length <= maxAccounts)
+            if (accounts.length < maxAccounts)
             {
                 accounts.push(name);
                 await ctx.stub.putState('accounts', Buffer.from(JSON.stringify(accounts)));

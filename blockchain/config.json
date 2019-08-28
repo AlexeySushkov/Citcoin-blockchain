@@ -1,0 +1,13 @@
+{
+    "channel_name": "citcoin2",
+    "smart_contract_name": "citcoin4",
+    "connection_file": "citcoin2_citcoin3_profile.json",
+    "appAdmin": "app-admin",
+    "appAdminSecret": "app-adminpw",
+    "orgMSPID": "org1msp",
+    "caName": "159.122.186.188:31894",
+    "peer": "159.122.186.188:32484",
+    "orderer": "159.122.186.188:30575",
+    "userName": "user1",
+    "gatewayDiscovery": { "enabled": true, "asLocalhost": false }
+}
