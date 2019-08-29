@@ -1,4 +1,4 @@
-# hiperledger1
+# Citcoin Network
 
 ## Project setup
 ```

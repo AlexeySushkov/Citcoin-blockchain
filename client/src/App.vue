@@ -102,6 +102,7 @@
    <v-dialog
       v-model="dialog_about"
       width="400px"
+      persistent=true
     >
       <v-card class="elevation-12">
         <v-toolbar dark color="blue darken-3">
@@ -137,6 +138,7 @@
    <v-dialog
       v-model="dialog_init"
       width="400px"
+      persistent=true
     >
       <v-card class="elevation-12">
         <v-toolbar dark color="blue darken-3">
@@ -167,6 +169,7 @@
    <v-dialog
       v-model="dialog_disconnect"
       width="400px"
+      persistent=true
     >
       <v-card class="elevation-12">
         <v-toolbar dark color="blue darken-3">
@@ -197,35 +200,51 @@
   <v-dialog
       v-model="dialog_transaction"
       width="400px"
+      persistent=true
     >
       <v-card class="elevation-12">
         <v-toolbar dark color="blue darken-3">
           <v-toolbar-title>Send Transaction</v-toolbar-title>
         </v-toolbar>
          <v-container>
-            <v-text-field
+
+          <v-select
+              :items="['Bob', 'Alice', 'Alex']"
+              label="From account*"
+              v-model="fromAccount"
+              placeholder="Select the From account"
+            ></v-select>           
+            <!-- v-text-field
               label="From"
               v-model="fromAccount"
-            ></v-text-field>
+            ></v-text-field-->
             <v-text-field
               label="From Balance"
               v-model="fromBalance"
               append-outer-icon="search"
+              placeholder="To get the From balance click the search icon:"
               @click:append-outer="GetBalanceFrom"
             ></v-text-field>
-            <v-text-field
+            <v-select
+                :items="['Bob', 'Alice', 'Alex']"
+                label="To account*"
+                v-model="toAccount"
+                placeholder="Select the To account"
+              ></v-select>    
+            <!--v-text-field
               label="To"
               v-model="toAccount"
-            ></v-text-field>
+            ></v-text-field-->
             <v-text-field
               label="To Balance"
               v-model="toBalance"
               append-outer-icon="search"
+              placeholder="To get the To balance click the search icon:"
               @click:append-outer="GetBalanceTo"
             ></v-text-field>
             <v-select
-              :items="['1', '2', '5', '10']"
-              label="Amount citcoins"
+              :items="['1', '3', '5']"
+              label="Amount citcoins*"
               v-model="volume"
             ></v-select>                               
         </v-container>
@@ -247,6 +266,7 @@
   <v-dialog
       v-model="dialog_new_account"
       width="400px"
+      persistent=true
     >
       <v-card class="elevation-12">
         <v-toolbar dark color="blue darken-3">
@@ -282,6 +302,7 @@
   <v-dialog
       v-model="dialog_events"
       width="400px"
+      persistent=true
     >
       <v-card class="elevation-12">
         <v-toolbar dark color="blue darken-3">
@@ -307,6 +328,7 @@
       <v-dialog
       v-model="dialog_view_accounts"
       width="400px"
+      persistent=true
     >
       <v-card class="elevation-12">
         <v-toolbar dark color="blue darken-3">
@@ -412,7 +434,7 @@
       dialog_view_accounts: false,
       dialog_new_account: false,
       BlockchainState: 'Blockchain status: Not initialized',
-      items: [{text: 'Blockchain status: Not initialized', icon: 'No icon'}],
+      items: [],
       fromAccount: null,
       toAccount: null,
       fromBalance: null,
@@ -467,8 +489,11 @@
     async SendTransaction () {
       console.log('SendTransaction')
       this.dialog_transaction = false
-      this.BlockchainState = 'Status: Sending transaction...'
-      AddLog(this.items, this.BlockchainState)
+      this.BlockchainState = 'Sending transaction... '
+      AddLog(this.items, 'To: ' + this.toAccount + ' (balance: ' + this.toBalance + ')' )
+      AddLog(this.items, 'From: ' + this.fromAccount + ' (balance: ' + this.fromBalance + ')' )
+      AddLog(this.items, 'Sending: ' + this.volume + ((this.volume ==='1')?' citcoin':' citcoins'))
+
       try {
         let params = {
           from: this.fromAccount,
@@ -516,7 +541,8 @@
     async GetBalanceFrom () {
       console.log('GetBalanceFrom')
       try {
-        this.BlockchainState = 'Status: Getting balance From...'       
+        this.BlockchainState = 'Status: Getting balance From...'    
+        this.fromBalance = 'Getting balance From...'
         AddLog(this.items, this.BlockchainState)  
         let params = {
           account: this.fromAccount
@@ -524,7 +550,7 @@
         console.log('GetBalance: ', params)
         let ret = await BlockchainApi.blockchain_info(params)
         this.fromBalance = ret.data.balance
-        this.BlockchainState = ret.data.status
+        this.BlockchainState = ret.data.status + '. From: ' + this.fromBalance
         } catch (error) {
         if ((error.response !== undefined) && (error.response.data.error !== undefined)) {
           this.BlockchainState = error.response.data.error
@@ -538,14 +564,15 @@
       console.log('GetBalanceTo')
       try {
         this.BlockchainState = 'Status: Getting balances To...'       
-        AddLog(this.items, this.BlockchainState)  
+        this.toBalance = 'Getting balance To...'
+       AddLog(this.items, this.BlockchainState)  
         let params = {
           account: this.toAccount
         }
         console.log('GetBalance: ', params)
         let ret = await BlockchainApi.blockchain_info(params)
         this.toBalance = ret.data.balance
-        this.BlockchainState = ret.data.status
+        this.BlockchainState = ret.data.status + '. To: ' + this.toBalance
         } catch (error) {
         if ((error.response !== undefined) && (error.response.data.error !== undefined)) {
           this.BlockchainState = error.response.data.error
@@ -595,6 +622,13 @@
         AddLog(this.items, this.BlockchainState)  
       }
      } // BlockchainListAccounts   
-     } 
+     },
+  async mounted () {
+      this.items.push({ text: 'Quick start:', icon: 'No'})
+      this.items.push({ text: 'First click Init Blockchain', icon: 'No'})
+      this.items.push({ text: 'Then Send Transaction', icon: 'No'})
+      this.items.push({ text: 'Account names are: Bob, Alice and Alex', icon: 'No'})      
+      this.items.push({ text: 'You can not add new Account because of Smart Contract limitation.', icon: 'No'})      
+  }      
     }
 </script>
