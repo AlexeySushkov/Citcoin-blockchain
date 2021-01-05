@@ -7,7 +7,7 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "fabric-network": "^1.4.4",
     "fs": "0.0.1-security",
     "nodemon": "^1.19.1",
